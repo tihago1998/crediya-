@@ -5,19 +5,19 @@ spring:
     name: "crediya"
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: "/h2"
   profiles:
     include: null
+  # Conexión a PostgreSQL.
+  # Los valores se leen de variables de entorno (definidas en docker-compose / .env);
+  # si no existen, se usan los valores por defecto para ejecutar en local (localhost:5432).
   datasource:
-    url: "jdbc:h2:mem:test"
-    username: "sa"
-    password: ""
-    driverClassName: "org.h2.Driver"
+    url: "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:crediya}"
+    username: "${DB_USER:crediya}"
+    password: "${DB_PASSWORD:crediya}"
+    driverClassName: "org.postgresql.Driver"
   jpa:
-    databasePlatform: "org.hibernate.dialect.H2Dialect"
+    # Dialecto de Hibernate para generar SQL compatible con PostgreSQL
+    databasePlatform: "org.hibernate.dialect.PostgreSQLDialect"
 management:
   endpoints:
     web:

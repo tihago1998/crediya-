@@ -1,0 +1,8 @@
+# Archivos que no se envían a Docker al construir la imagen (build más rápido y limpio)
+.git
+.gradle
+.idea
+.vscode
+**/build
+build-cache
+.env

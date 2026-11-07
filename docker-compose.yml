@@ -1,0 +1,47 @@
+# Orquesta los servicios del proyecto CrediYa:
+#   - db:  base de datos PostgreSQL
+#   - app: microservicio Spring Boot (se construye con deployment/Dockerfile)
+# Uso:  docker compose up -d --build
+services:
+
+  db:
+    image: postgres:17-alpine
+    container_name: crediya-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-crediya}
+      POSTGRES_USER: ${DB_USER:-crediya}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-crediya}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      # Volumen persistente: los datos sobreviven aunque se borre el contenedor
+      - crediya-data:/var/lib/postgresql/data
+    healthcheck:
+      # La app solo arranca cuando PostgreSQL ya acepta conexiones
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-crediya} -d ${DB_NAME:-crediya}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    container_name: crediya-app
+    environment:
+      # Dentro de la red de Docker, el host de la BD es el nombre del servicio: "db"
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-crediya}
+      DB_USER: ${DB_USER:-crediya}
+      DB_PASSWORD: ${DB_PASSWORD:-crediya}
+    ports:
+      # puerto_en_tu_PC:puerto_en_el_contenedor
+      # Se usa 8081 por defecto porque el 8080 lo ocupa Oracle (TNSLSNR) en Windows.
+      - "${APP_PORT:-8081}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  crediya-data:

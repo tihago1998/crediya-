@@ -1,0 +1,4 @@
+# Fuerza finales de línea Unix (LF) en scripts para que funcionen en WSL/Ubuntu y Docker
+gradlew text eol=lf
+*.sh    text eol=lf
+*.bat   text eol=crlf
