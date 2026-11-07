@@ -2,6 +2,8 @@ package co.com.bancolombia.jpa.helper;
 
 import co.com.bancolombia.jpa.JPARepository;
 import co.com.bancolombia.jpa.JPARepositoryAdapter;
+import co.com.bancolombia.jpa.entity.UserEntity;
+import co.com.bancolombia.model.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -12,10 +14,15 @@ import org.springframework.data.domain.Example;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
+/**
+ * Pruebas de las operaciones genéricas heredadas de {@link AdapterOperations},
+ * usando el adaptador real de usuarios.
+ */
 class AdapterOperationsTest {
 
     @Mock
@@ -26,73 +33,53 @@ class AdapterOperationsTest {
 
     private JPARepositoryAdapter adapter;
 
+    private final UserEntity entity = UserEntity.builder().id("id").correoElectronico("ana@mail.com").build();
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        when(objectMapper.map("value", Object.class)).thenReturn("value");
-
         adapter = new JPARepositoryAdapter(repository, objectMapper);
     }
 
     @Test
-    void testSave() {
-
-        Object objectValue = "value";
-
-        when(repository.save(objectValue)).thenReturn(objectValue);
-
-        Object result = adapter.save(objectValue);
-
-        assertEquals(result, objectValue);
-    }
-
-    @Test
     void testSaveAllEntities() {
+        when(repository.saveAll(anyList())).thenReturn(List.of(entity, entity));
 
-        List<Object> objectValues = List.of("value", "value");
+        List<User> result = adapter.saveAllEntities(List.of(new User(), new User()));
 
-        when(repository.saveAll(objectValues)).thenReturn(objectValues);
-
-        Object result = adapter.saveAllEntities(objectValues);
-
-        assertEquals(result, objectValues);
+        assertThat(result).hasSize(2).allMatch(u -> "id".equals(u.getId()));
     }
 
     @Test
     void testFindById() {
+        when(repository.findById("id")).thenReturn(Optional.of(entity));
 
-        Object objectValue = "value";
+        User result = adapter.findById("id");
 
-        when(repository.findById("id")).thenReturn(Optional.of(objectValue));
+        assertThat(result.getCorreoElectronico()).isEqualTo("ana@mail.com");
+    }
 
-        Object result = adapter.findById("id");
+    @Test
+    void testFindByIdNotFound() {
+        when(repository.findById("x")).thenReturn(Optional.empty());
 
-        assertEquals(result, objectValue);
+        assertThat(adapter.findById("x")).isNull();
     }
 
     @Test
     void testFindAll() {
+        when(repository.findAll()).thenReturn(List.of(entity, entity));
 
-        List<Object> objectValues = List.of("value", "value");
-
-        when(repository.findAll()).thenReturn(objectValues);
-
-        Object result = adapter.findAll();
-
-        assertEquals(result, objectValues);
+        assertThat(adapter.findAll()).hasSize(2);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testFindByExample() {
+        when(repository.findAll(any(Example.class))).thenReturn(List.of(entity));
 
-        Object objectValue = "value";
-        List<Object> objectValues = List.of(objectValue, objectValue);
+        List<User> result = adapter.findByExample(User.builder().correoElectronico("ana@mail.com").build());
 
-        when(repository.findAll(any(Example.class))).thenReturn(objectValues);
-
-        Object result = adapter.findByExample(objectValue);
-
-        assertEquals(result, objectValues);
+        assertThat(result).hasSize(1);
     }
 }

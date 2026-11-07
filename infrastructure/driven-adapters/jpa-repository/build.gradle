@@ -1,9 +1,14 @@
 dependencies {
 
-
+    // Spring Data JPA: permite mapear entidades y crear repositorios sobre la base de datos
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Mapper de reactive-commons para convertir entre entidades JPA y modelos de dominio
     implementation 'org.reactivecommons.utils:object-mapper-api:0.1.0'
 
-    runtimeOnly 'com.h2database:h2' // TODO: remove this to use real database
+    // Driver JDBC de PostgreSQL (base de datos real que corre en Docker)
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // H2 en memoria solo para las pruebas unitarias (no se empaqueta en el jar final)
+    testRuntimeOnly 'com.h2database:h2'
     testImplementation 'org.reactivecommons.utils:object-mapper:0.1.0'
 }
