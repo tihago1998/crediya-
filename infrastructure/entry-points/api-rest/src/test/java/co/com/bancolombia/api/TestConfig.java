@@ -1,7 +1,10 @@
 package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.config.CorsConfig;
+import co.com.bancolombia.usecase.user.UserUseCase;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
@@ -18,4 +21,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         ))
 @Import(ApiRest.class)
 public class TestConfig {
+
+    /** Mock del caso de uso para que el contexto de pruebas pueda crear UserController. */
+    @Bean
+    public UserUseCase userUseCase() {
+        return Mockito.mock(UserUseCase.class);
+    }
 }
